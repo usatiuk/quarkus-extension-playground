@@ -24,10 +24,10 @@ public class HelloGeneratorProcessor {
             classCreator.addAnnotation(Singleton.class);
 
             try (MethodCreator methodCreator = classCreator.getMethodCreator("generate", String.class, String.class)) {
+                var method = MethodDescriptor.ofMethod(String.class, "concat", String.class, String.class);
                 var name = methodCreator.getMethodParam(0);
                 var prefix = methodCreator.load("Hello ");
-                var concatenated = methodCreator.invokeVirtualMethod(
-                        MethodDescriptor.ofMethod(String.class, "concat", String.class, String.class),
+                var concatenated = methodCreator.invokeVirtualMethod(method,
                         prefix, name);
                 methodCreator.returnValue(concatenated);
             }
