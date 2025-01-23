@@ -21,14 +21,17 @@ public class HelloGeneratorProcessor {
                 .classOutput(gizmoAdapter)
                 .build()) {
 
+            // Can also be ApplicationScoped
             classCreator.addAnnotation(Singleton.class);
 
+            // Implement our method
             try (MethodCreator methodCreator = classCreator.getMethodCreator("generate", String.class, String.class)) {
+                // Manually concatenate the strings using the String.concat method
+                // Gizmo's StringBuilderGenerator could also be used
                 var method = MethodDescriptor.ofMethod(String.class, "concat", String.class, String.class);
                 var name = methodCreator.getMethodParam(0);
                 var prefix = methodCreator.load("Hello ");
-                var concatenated = methodCreator.invokeVirtualMethod(method,
-                        prefix, name);
+                var concatenated = methodCreator.invokeVirtualMethod(method, prefix, name);
                 methodCreator.returnValue(concatenated);
             }
         }

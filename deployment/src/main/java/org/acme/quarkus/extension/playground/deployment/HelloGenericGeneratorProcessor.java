@@ -6,7 +6,7 @@ import io.quarkus.deployment.annotations.BuildProducer;
 import io.quarkus.deployment.annotations.BuildStep;
 import io.quarkus.deployment.builditem.ApplicationIndexBuildItem;
 import io.quarkus.gizmo.ClassCreator;
-import io.quarkus.gizmo.MethodDescriptor;
+import io.quarkus.gizmo.Gizmo;
 import io.quarkus.gizmo.SignatureBuilder;
 import io.quarkus.gizmo.Type;
 import jakarta.inject.Singleton;
@@ -48,19 +48,14 @@ public class HelloGenericGeneratorProcessor {
 
                 try (var methodCreator = classCreator.getMethodCreator("generate", String.class, Object.class)) {
                     var arg = methodCreator.getMethodParam(0);
-                    var prefix = methodCreator.load("Hello,");
-                    var strConcat = MethodDescriptor.ofMethod(String.class, "concat", String.class, String.class);
-                    var toStringMethod = MethodDescriptor.ofMethod(Object.class, "toString", String.class);
-                    var concatenated = prefix;
+                    var sb = Gizmo.newStringBuilder(methodCreator);
+                    sb.append(methodCreator.load("Hello,"));
                     for (var field : type.klass.fields()) {
                         var fieldVal = methodCreator.readInstanceField(field, arg);
-                        concatenated = methodCreator.invokeVirtualMethod(strConcat,
-                                concatenated, methodCreator.load("\n" + field.name() + ": "));
-                        var fieldStringified = methodCreator.invokeVirtualMethod(toStringMethod, fieldVal);
-                        concatenated = methodCreator.invokeVirtualMethod(strConcat, concatenated, fieldStringified);
+                        sb.append(methodCreator.load("\n" + field.name() + ": "));
+                        sb.append(fieldVal);
                     }
-
-                    methodCreator.returnValue(concatenated);
+                    methodCreator.returnValue(sb.callToString());
                 }
             }
         }
